@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Person } from 'src/app/models/person.model';
+
 @Component({
   selector: 'app-person',
   templateUrl: './person.component.html',
@@ -8,6 +9,7 @@ import { Person } from 'src/app/models/person.model';
 export class PersonComponent implements OnInit {
 
   @Input() person!: Person;
+  @Output() onSelected = new EventEmitter<Person>();
   imc='';
   constructor() { }
 
@@ -16,6 +18,10 @@ export class PersonComponent implements OnInit {
 
   calcIMC(){
     this.imc =this.person.calcIMC();
+  }
+
+  onClick(){
+    this.onSelected.emit(this.person);
   }
 
 }

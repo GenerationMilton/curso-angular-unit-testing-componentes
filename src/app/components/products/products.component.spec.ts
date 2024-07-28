@@ -1,14 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { of } from 'rxjs';
+import { generateManyProducts } from 'src/app/models/product.mock';
+import { ProductsService } from 'src/app/services/product.service';
+import { ProductComponent } from '../product/product.component';
 import { ProductsComponent } from './products.component';
-
-xdescribe('ProductsComponent', () => {
+fdescribe('ProductsComponent', () => {
   let component: ProductsComponent;
   let fixture: ComponentFixture<ProductsComponent>;
+  let productsService: jasmine.SpyObj<ProductsService>;
 
   beforeEach(async () => {
+    const spy= jasmine.createSpyObj('ProductService',['getAll']);
+
     await TestBed.configureTestingModule({
-      declarations: [ ProductsComponent ]
+      declarations: [ ProductsComponent,ProductComponent],
+      providers:[
+        {provide: ProductsService, useValue: spy}
+      ]
     })
     .compileComponents();
   });
@@ -16,10 +25,34 @@ xdescribe('ProductsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ProductsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    productsService= TestBed.inject(ProductsService) as jasmine.SpyObj<ProductsService>;
+    const productsMock= generateManyProducts(3);
+    productsService.getAll.and.returnValue(of(productsMock));
+
+    fixture.detectChanges();//ngOnInit
+
+
   });
 
   it('should create', () => {
+
     expect(component).toBeTruthy();
+    expect(productsService.getAll).toHaveBeenCalled();
+  });
+
+  describe('tests for getAllProducts', () => {
+
+    it('should return product list from service', () => {
+      // Arrange
+      const productsMock = generateManyProducts(10);
+      productsService.getAll.and.returnValue(of(productsMock));
+      const countPrev = component.products.length;
+      // Act
+      component.getAllProducts();
+      fixture.detectChanges();
+      // Assert
+      expect(component.products.length).toEqual(productsMock.length + countPrev);
+    });
+
   });
 });
